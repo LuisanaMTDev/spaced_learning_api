@@ -9,6 +9,7 @@ import (
 	"github.com/LuisanaMTDev/spaced_learning/server/controllers"
 	"github.com/LuisanaMTDev/spaced_learning/server/database/gosql_queries"
 	"github.com/LuisanaMTDev/spaced_learning/server/helpers"
+	"github.com/LuisanaMTDev/spaced_learning/server/middlewares"
 	"github.com/joho/godotenv"
 	_ "modernc.org/sqlite"
 )
@@ -43,6 +44,10 @@ func main() {
 	log.Printf("Running platfotm: %s", serverConfig.Platform)
 
 	//End points
+	handler.Handle("GET /app/", http.StripPrefix("/app/", middlewares.ExcludeFiles(
+		http.FileServer(http.Dir("./frontend/assets/")), []string{"css/input.css", "images/favicon.svg"},
+	)))
+
 	handler.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello World."))
 	})
