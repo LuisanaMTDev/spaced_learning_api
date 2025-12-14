@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/LuisanaMTDev/spaced_learning/server/controllers"
 	"github.com/LuisanaMTDev/spaced_learning/server/database/gosql_queries"
 	"github.com/LuisanaMTDev/spaced_learning/server/helpers"
 	"github.com/joho/godotenv"
@@ -45,6 +46,8 @@ func main() {
 	handler.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("Hello World."))
 	})
+
+	handler.HandleFunc("POST /lesson/add", controllers.AddLesson(&serverConfig))
 
 	log.Fatal(server.ListenAndServe())
 }
