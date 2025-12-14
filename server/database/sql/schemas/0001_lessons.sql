@@ -2,7 +2,8 @@
 CREATE TABLE IF NOT EXISTS lessons(
         id TEXT NOT NULL UNIQUE PRIMARY KEY, -- Pattern: ls-#
         topic TEXT NOT NULL UNIQUE,
-        started_date TEXT,
+        started_date TEXT NOT NULL,
+        repetitions_dates TEXT NOT NULL,
         amount_of_cards INTEGER NOT NULL,
         created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
         updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
