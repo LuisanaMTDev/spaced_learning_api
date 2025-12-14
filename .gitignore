@@ -1,3 +1,4 @@
 spaced_learning.db
 up-down-migrations-commands.txt
 cli/target
+.env
