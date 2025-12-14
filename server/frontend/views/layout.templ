@@ -1,0 +1,20 @@
+package views
+
+templ Layout() {
+	<!DOCTYPE html>
+	<html lang="es">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<link rel="icon" type="image/png" href="/app/images/favicon-black.png"/>
+			<link rel="icon" type="image/png" href="/app/images/favicon-white.png" media="(prefers-color-scheme: dark)"/>
+			<link rel="stylesheet" href="/app/css/styles.css"/>
+			<script defer src="/app/js/htmx.min.js"></script>
+			<script defer src="/app/js/htmx-config.js"></script>
+			<title>Spaced Learning</title>
+		</head>
+		<body>
+			{ children... }
+		</body>
+	</html>
+}

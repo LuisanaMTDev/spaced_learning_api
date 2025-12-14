@@ -5,9 +5,11 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/LuisanaMTDev/spaced_learning/server/controllers"
 	"github.com/LuisanaMTDev/spaced_learning/server/database/gosql_queries"
+	"github.com/LuisanaMTDev/spaced_learning/server/frontend/views"
 	"github.com/LuisanaMTDev/spaced_learning/server/helpers"
 	"github.com/LuisanaMTDev/spaced_learning/server/middlewares"
 	"github.com/joho/godotenv"
@@ -49,7 +51,19 @@ func main() {
 	)))
 
 	handler.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World."))
+		client := r.Header.Get("SL-Client-Type")
+
+		if strings.Contains(client, "SL-CLI") {
+			w.Header().Set("Content-Type", "text/plain")
+			w.WriteHeader(http.StatusForbidden)
+			w.Write([]byte("This endpoint isn't intended to work with the CLI."))
+		}
+
+		err := views.Index().Render(r.Context(), w)
+		if err != nil {
+			log.Printf("Error while sending main page: %s", err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	})
 
 	handler.HandleFunc("POST /lesson/add", controllers.AddLesson(&serverConfig))
