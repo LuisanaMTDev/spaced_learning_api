@@ -4,15 +4,12 @@
 
 package gosql_queries
 
-import (
-	"database/sql"
-)
-
 type Lesson struct {
-	ID            string
-	Topic         string
-	StartedDate   sql.NullString
-	AmountOfCards int64
-	CreatedAt     string
-	UpdatedAt     string
+	ID               int64
+	Topic            string
+	StartedDate      string
+	RepetitionsDates string
+	AmountOfCards    int64
+	CreatedAt        string
+	UpdatedAt        string
 }

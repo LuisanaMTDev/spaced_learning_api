@@ -1,6 +1,6 @@
 -- +goose Up
 CREATE TABLE IF NOT EXISTS lessons(
-        id TEXT NOT NULL UNIQUE PRIMARY KEY, -- Pattern: ls-#
+        id INTEGER NOT NULL UNIQUE PRIMARY KEY AUTOINCREMENT,
         topic TEXT NOT NULL UNIQUE,
         started_date TEXT NOT NULL,
         repetitions_dates TEXT NOT NULL,
@@ -9,7 +9,8 @@ CREATE TABLE IF NOT EXISTS lessons(
         updated_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
 );
 
-INSERT INTO lessons(id, topic, amount_of_cards) VALUES ('ls-0', 'Ejemplo', 0);
+INSERT INTO lessons(topic, started_date, repetitions_dates, amount_of_cards)
+VALUES ('Ejemplo', '0000-00-00', json('[]'), 0);
 -- +goose Down
 DELETE FROM lessons;
 DROP TABLE lessons;
