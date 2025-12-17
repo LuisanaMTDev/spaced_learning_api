@@ -27,14 +27,14 @@ func main() {
 		dbURL := os.Getenv("DB_URL_PROD")
 		db, err = sql.Open("libsql", dbURL)
 		if err != nil {
-			log.Printf("Error while opening db: %v", err)
+			log.Printf("ERROR: while opening db: %v", err)
 			return
 		}
 	} else {
 		dbURL := os.Getenv("DB_URL_DEV")
 		db, err = sql.Open("sqlite", dbURL)
 		if err != nil {
-			log.Printf("Error while opening db: %v", err)
+			log.Printf("ERROR: while opening db: %v", err)
 			return
 		}
 	}
@@ -61,7 +61,7 @@ func main() {
 
 		err := views.Index().Render(r.Context(), w)
 		if err != nil {
-			log.Printf("Error while sending main page: %s", err)
+			log.Printf("ERROR: while sending main page: %s", err)
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	})
