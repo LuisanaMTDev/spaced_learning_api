@@ -1,14 +1,43 @@
 use chrono::Local;
 use clap::Parser;
+use dotenv::dotenv;
 use owo_colors::OwoColorize;
 use terminal_size::{Width, terminal_size};
 
 use crate::library::commands::Args;
+use crate::library::errors::SLError;
+use crate::library::http_client::SLHttpClient;
 
 mod library;
 
-fn main() {
+#[tokio::main]
+async fn main() -> anyhow::Result<(), SLError> {
+    if let Err(error) = dotenv() {
+        return Err(SLError::LoadEnvsFaild(error));
+    }
+
+    let sl_http_client_result = SLHttpClient::new();
+    let sl_http_client;
+    match sl_http_client_result {
+        Err(error) => return Err(error),
+        Ok(client) => sl_http_client = client,
+    };
     let args = Args::parse();
+
+    if args.save {
+        let response = sl_http_client
+            .post_lesson(
+                args.topic.clone(),
+                args.amount_of_cards,
+                args.calculate_repetitions_dates(),
+            )
+            .await;
+
+        match response {
+            Ok(response_data) => println!("{}", response_data.green().bold()),
+            Err(error) => return Err(SLError::RequestToServerFailed(error)),
+        };
+    }
 
     if let Some((Width(w), _)) = terminal_size() {
         println!(
@@ -43,4 +72,6 @@ fn main() {
         );
         args.print_repetitions_dates();
     }
+
+    Ok(())
 }

@@ -17,7 +17,7 @@ pub struct Args {
 }
 
 impl Args {
-    fn calculate_repetitions_dates(&self) -> Vec<String> {
+    pub fn calculate_repetitions_dates(&self) -> Vec<String> {
         let mut repetitions_dates: Vec<String> = vec![];
         let mut last_repetition_date = Local::now().date_naive();
 
