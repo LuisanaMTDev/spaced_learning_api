@@ -11,7 +11,7 @@ use crate::library::http_client::SLHttpClient;
 mod library;
 
 #[tokio::main]
-async fn main() -> anyhow::Result<(), SLError> {
+async fn main() -> Result<(), SLError> {
     if let Err(error) = dotenv() {
         return Err(SLError::LoadEnvsFaild(error));
     }
