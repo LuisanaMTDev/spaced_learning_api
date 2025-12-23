@@ -2,11 +2,10 @@ package controllers
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/LuisanaMTDev/spaced_learning/server/database/gosql_queries"
-	"github.com/LuisanaMTDev/spaced_learning/server/helpers"
+	"github.com/rs/zerolog/log"
 )
 
 func AddLesson(sc *helpers.ServerConfig) http.HandlerFunc {
@@ -18,7 +17,7 @@ func AddLesson(sc *helpers.ServerConfig) http.HandlerFunc {
 			body := AddLessonRequest{}
 			err := json.NewDecoder(r.Body).Decode(&body)
 
-			if err != nil {
+			log.Error().AnErr("error", err).Msg("While decoding json request.")
 				log.Printf("ERROR: while decoding json request: %s", err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
@@ -73,5 +72,11 @@ func AddLesson(sc *helpers.ServerConfig) http.HandlerFunc {
 			w.WriteHeader(http.StatusForbidden)
 			w.Write([]byte("Invalid SL-Client-Type header"))
 		}
+		log.Debug().Any("request_body", body).Msg("Decoded request body.")
+			log.Error().AnErr("error", err).Msg("While marshaling repetitions dates on decoded request body.")
+			log.Error().AnErr("error", err).Msg("While adding lesson to the database.")
+			log.Error().AnErr("error", err).Msg("While getting lessons from the database.")
+		log.Debug().Any("current_lessons", currentLessons).Msg("Current lessons in the database.")
+			log.Error().AnErr("error", err).Msg("While parsing request form.")
 	}
 }

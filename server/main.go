@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -10,14 +9,16 @@ import (
 	"github.com/LuisanaMTDev/spaced_learning/server/controllers"
 	"github.com/LuisanaMTDev/spaced_learning/server/database/gosql_queries"
 	"github.com/LuisanaMTDev/spaced_learning/server/frontend/views"
-	"github.com/LuisanaMTDev/spaced_learning/server/helpers"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	_ "modernc.org/sqlite"
 )
 
 func main() {
 
 	godotenv.Load()
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	platform := os.Getenv("PLATFORM")
 	var db *sql.DB
 	var err error
@@ -26,14 +27,14 @@ func main() {
 		dbURL := os.Getenv("DB_URL_PROD")
 		db, err = sql.Open("libsql", dbURL)
 		if err != nil {
-			log.Printf("ERROR: while opening db: %v", err)
+			log.Fatal().AnErr("error", err).Msg("ERROR: while opening db.")
 			return
 		}
 	} else {
 		dbURL := os.Getenv("DB_URL_DEV")
 		db, err = sql.Open("sqlite", dbURL)
 		if err != nil {
-			log.Printf("ERROR: while opening db: %v", err)
+			log.Fatal().AnErr("error", err).Msg("ERROR: while opening db.")
 			return
 		}
 	}
@@ -58,12 +59,15 @@ func main() {
 
 		err := views.Index().Render(r.Context(), w)
 		if err != nil {
-			log.Printf("ERROR: while sending main page: %s", err)
+			log.Fatal().AnErr("error", err).Msg("ERROR: while sending main page")
 			w.WriteHeader(http.StatusInternalServerError)
 		}
 	})
 
 	handler.HandleFunc("POST /lesson/add", controllers.AddLesson(&serverConfig))
 
-	log.Fatal(server.ListenAndServe())
+	server := http.Server{Handler: handler, Addr: ":8090"}
+	log.Info().Str("running_platfotm", serverConfig.Platform).Msg("Running...")
+	err = server.ListenAndServe()
+	log.Fatal().AnErr("server_error", err)
 }
