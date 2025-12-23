@@ -8,75 +8,67 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func AddLesson(sc *helpers.ServerConfig) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		client := r.Header.Get("SL-Client-Type")
+func (sc *ServerConfig) AddLesson(w http.ResponseWriter, r *http.Request) {
+	client := r.Header.Get("SL-Client-Type")
 
-		switch client {
-		case "SL-CLI":
-			body := AddLessonRequest{}
-			err := json.NewDecoder(r.Body).Decode(&body)
+	switch client {
+	case "SL-CLI":
+		body := AddLessonRequest{}
+		err := json.NewDecoder(r.Body).Decode(&body)
 
+		if err != nil {
 			log.Error().AnErr("error", err).Msg("While decoding json request.")
-				log.Printf("ERROR: while decoding json request: %s", err)
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-
-			log.Printf("SUCCESS: Decoded request body: %v", body)
-
-			repetitionsDatesAsJson, err := json.Marshal(body.RepetitionsDates)
-
-			if err != nil {
-				log.Printf("ERROR: while marshaling repetitions dates on decoded request body: %s", err)
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-
-			repetitionsDatesAsString := string(repetitionsDatesAsJson)
-
-			err = sc.DBQueries.AddLesson(r.Context(), gosql_queries.AddLessonParams{
-				Topic:         body.Topic,
-				StartedDate:   body.RepetitionsDates[0],
-				Json:          repetitionsDatesAsString,
-				AmountOfCards: body.AmountOfCards,
-			})
-
-			if err != nil {
-				log.Printf("ERROR: while adding lesson to the database: %s", err)
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-
-			currentLessons, err := sc.DBQueries.GetAllLessons(r.Context())
-
-			if err != nil {
-				log.Printf("ERROR: while getting lessons from the database: %s", err)
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-
-			log.Printf("SUCCESS: Current lessons in the database: %v", currentLessons)
-
-			w.Write([]byte("Request has success."))
-		case "SL-WEB-APP":
-			err := r.ParseForm()
-
-			if err != nil {
-				log.Printf("ERROR: while parsing request form: %s", err)
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-		default:
-			w.Header().Set("Content-Type", "text/plain")
-			w.WriteHeader(http.StatusForbidden)
-			w.Write([]byte("Invalid SL-Client-Type header"))
+			w.WriteHeader(http.StatusInternalServerError)
+			return
 		}
+
 		log.Debug().Any("request_body", body).Msg("Decoded request body.")
+
+		repetitionsDatesAsJson, err := json.Marshal(body.RepetitionsDates)
+
+		if err != nil {
 			log.Error().AnErr("error", err).Msg("While marshaling repetitions dates on decoded request body.")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		repetitionsDatesAsString := string(repetitionsDatesAsJson)
+
+		err = sc.DBQueries.AddLesson(r.Context(), gosql_queries.AddLessonParams{
+			Topic:         body.Topic,
+			StartedDate:   body.RepetitionsDates[0],
+			Json:          repetitionsDatesAsString,
+			AmountOfCards: body.AmountOfCards,
+		})
+
+		if err != nil {
 			log.Error().AnErr("error", err).Msg("While adding lesson to the database.")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		currentLessons, err := sc.DBQueries.GetAllLessons(r.Context())
+
+		if err != nil {
 			log.Error().AnErr("error", err).Msg("While getting lessons from the database.")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
 		log.Debug().Any("current_lessons", currentLessons).Msg("Current lessons in the database.")
+
+		w.Write([]byte("Request has success."))
+	case "SL-WEB-APP":
+		err := r.ParseForm()
+
+		if err != nil {
 			log.Error().AnErr("error", err).Msg("While parsing request form.")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	default:
+		w.Header().Set("Content-Type", "text/plain")
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte("Invalid SL-Client-Type header"))
 	}
 }

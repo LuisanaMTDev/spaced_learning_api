@@ -10,6 +10,7 @@ import (
 	"github.com/LuisanaMTDev/spaced_learning/server/database/gosql_queries"
 	"github.com/LuisanaMTDev/spaced_learning/server/frontend/views"
 	"github.com/joho/godotenv"
+	// "github.com/justinas/alice"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	_ "modernc.org/sqlite"
@@ -41,9 +42,7 @@ func main() {
 
 	dbQueries := gosql_queries.New(db)
 	handler := http.NewServeMux()
-	serverConfig := helpers.ServerConfig{DBQueries: dbQueries, Platform: platform}
-	server := http.Server{Handler: handler, Addr: ":8090"}
-	log.Printf("Running platfotm: %s", serverConfig.Platform)
+	serverConfig := controllers.NewServerConfig(dbQueries, platform)
 
 	//End points
 	handler.Handle("GET /app/", http.StripPrefix("/app/", http.FileServer(http.Dir("./frontend/assets/"))))
@@ -64,7 +63,7 @@ func main() {
 		}
 	})
 
-	handler.HandleFunc("POST /lesson/add", controllers.AddLesson(&serverConfig))
+	handler.HandleFunc("POST /lesson/add", serverConfig.AddLesson)
 
 	server := http.Server{Handler: handler, Addr: ":8090"}
 	log.Info().Str("running_platfotm", serverConfig.Platform).Msg("Running...")
